@@ -153,7 +153,7 @@ class ImeService : InputMethodService() {
                     contentTopInsets = EnvironmentSingleton.instance.mScreenHeight
                     visibleTopInsets = EnvironmentSingleton.instance.mScreenHeight
                     touchableInsets = Insets.TOUCHABLE_INSETS_REGION
-                    touchableRegion.set(x, y, x + mInputView.mSkbRoot.width, y + mInputView.mSkbRoot.height)
+                    if (::mInputView.isInitialized) touchableRegion.set(x, y, x + mInputView.mSkbRoot.width, y + mInputView.mSkbRoot.height)
                 } else {
                     contentTopInsets = y
                     touchableInsets = Insets.TOUCHABLE_INSETS_CONTENT
@@ -164,7 +164,7 @@ class ImeService : InputMethodService() {
                 contentTopInsets = EnvironmentSingleton.instance.mScreenHeight
                 visibleTopInsets = EnvironmentSingleton.instance.mScreenHeight
                 touchableInsets = Insets.TOUCHABLE_INSETS_REGION
-                touchableRegion.set(x, y, x + mCandidateView.mSkbRoot.width, y + mCandidateView.mSkbRoot.height)
+                if (::mCandidateView.isInitialized) touchableRegion.set(x, y, x + mCandidateView.mSkbRoot.width, y + mCandidateView.mSkbRoot.height)
             }
         }
     }
