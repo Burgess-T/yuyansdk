@@ -107,7 +107,7 @@ class ImeService : InputMethodService() {
                 KeyboardLoaderUtil.instance.clearKeyboardMap()
                 KeyboardManager.instance.clearKeyboard()
                 KeyboardManager.instance.switchKeyboard()
-            } else if(isHardwareKeyboard){
+            } else if(isHardwareKeyboard && ::mCandidateView.isInitialized){
                 mCandidateView.initView()
             }
         }
@@ -118,16 +118,16 @@ class ImeService : InputMethodService() {
         // 0 != event.getRepeatCount()  长按物理按键或 Shift/Meta/Ctrl的组合按键时，交由系统处理;有个特殊组合键：Ctrl+SPACE切换语言
         return if (0 != event.repeatCount || event.isShiftPressed || event.isMetaPressed) super.onKeyDown(keyCode, event)
         else if(event.isCtrlPressed && keyCode != KeyEvent.KEYCODE_SPACE)super.onKeyDown(keyCode, event)
-        else if (isSoftKeyboard) mInputView.processKeyDown(keyCode, event) || super.onKeyUp(keyCode, event)
-        else if (isHardwareKeyboard) mCandidateView.processKeyDown(keyCode, event) || super.onKeyUp(keyCode, event)
+        else if (isSoftKeyboard && ::mInputView.isInitialized) mInputView.processKeyDown(keyCode, event) || super.onKeyUp(keyCode, event)
+        else if (isHardwareKeyboard && ::mCandidateView.isInitialized) mCandidateView.processKeyDown(keyCode, event) || super.onKeyUp(keyCode, event)
         else super.onKeyDown(keyCode, event)
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
         return if (0 != event.repeatCount || event.isShiftPressed || event.isMetaPressed) super.onKeyDown(keyCode, event)
         else if(event.isCtrlPressed && keyCode != KeyEvent.KEYCODE_SPACE)super.onKeyDown(keyCode, event)
-        else if (isSoftKeyboard) mInputView.processKeyUp(event) || super.onKeyUp(keyCode, event)
-        else if (isHardwareKeyboard) mCandidateView.processKeyUp(event) || super.onKeyUp(keyCode, event)
+        else if (isSoftKeyboard && ::mInputView.isInitialized) mInputView.processKeyUp(event) || super.onKeyUp(keyCode, event)
+        else if (isHardwareKeyboard && ::mCandidateView.isInitialized) mCandidateView.processKeyUp(event) || super.onKeyUp(keyCode, event)
         else super.onKeyDown(keyCode, event)
     }
 
@@ -144,6 +144,10 @@ class ImeService : InputMethodService() {
 
 
     override fun onComputeInsets(outInsets: Insets) {
+        if (!::mInputView.isInitialized && !::mCandidateView.isInitialized) {
+            super.onComputeInsets(outInsets)
+            return
+        }
         val (x, y) = if (isSoftKeyboard && ::mInputView.isInitialized) intArrayOf(0, 0).also {if(mInputView.isAddPhrases) mInputView.mAddPhrasesLayout.getLocationInWindow(it) else mInputView.mSkbRoot.getLocationInWindow(it) }
         else if (isHardwareKeyboard && ::mCandidateView.isInitialized) intArrayOf(0, 0).also {mCandidateView.mSkbRoot.getLocationInWindow(it) }
         else intArrayOf(0, 0)
@@ -171,7 +175,7 @@ class ImeService : InputMethodService() {
 
     override fun onUpdateSelection(oldSelStart: Int, oldSelEnd: Int, newSelStart: Int, newSelEnd: Int, candidatesStart: Int, candidatesEnd: Int) {
         super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd)
-        if (isSoftKeyboard) mInputView.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesEnd)
+        if (isSoftKeyboard && ::mInputView.isInitialized) mInputView.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesEnd)
     }
 
     private val cursorAnchorPosition = FloatArray(2)
@@ -184,16 +188,16 @@ class ImeService : InputMethodService() {
         if (matrix != null) {
             matrix.mapPoints(cursorAnchorPosition)
         }
-        mCandidateView.updatePosition(cursorAnchorPosition)
+        if (::mCandidateView.isInitialized) mCandidateView.updatePosition(cursorAnchorPosition)
     }
 
     override fun onWindowShown() {
-        if (isSoftKeyboard) mInputView.onWindowShown()
+        if (isSoftKeyboard && ::mInputView.isInitialized) mInputView.onWindowShown()
         super.onWindowShown()
     }
 
     override fun onWindowHidden() {
-        if(isSoftKeyboard) mInputView.onWindowHidden()
+        if(isSoftKeyboard && ::mInputView.isInitialized) mInputView.onWindowHidden()
         super.onWindowHidden()
     }
 
